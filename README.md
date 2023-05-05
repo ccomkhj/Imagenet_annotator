@@ -18,10 +18,13 @@ no plant: 2
 ```
 
 2. run
+
 if you want to create annotation only
+
 `python createClsAnns.py -i {image directory}`
 
 if you want to copy images, too
+
 `python createClsAnns.py -s -i {image directory}`
 
 3. type relevant class number per image
