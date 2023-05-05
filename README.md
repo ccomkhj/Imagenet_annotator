@@ -9,9 +9,13 @@ no plant: 2
 ```
 
 2. run
+if you want to create annotation only
 `python createClsAnns.py -i {image directory}`
 
-3. type relevant class number
+if you want to copy images, too
+`python createClsAnns.py -s -i {image directory}`
+
+3. type relevant class number per image
 
 4. if you made mistake, type 'x'. It is logged that you made mistake in which image file.
 
@@ -19,4 +23,5 @@ no plant: 2
 
 ### Output
 `result/ann_{epoch time}.txt`
+
 `result/log_{epoch time}.txt`
