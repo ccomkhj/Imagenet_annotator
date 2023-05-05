@@ -1,5 +1,14 @@
 ## Rapid Imagenet-style Annotation Generator (Classification)
 
+0. setup
+```bash
+conda create -n ann python=3.11
+conda activate ann
+git clone https://github.com/ccomkhj/Imagenet_annotator.git
+cd Imagenet_annotator
+pip install -r requirements.txt
+```
+
 1. prepare config file
 `config/class.yaml`
 ```yaml
