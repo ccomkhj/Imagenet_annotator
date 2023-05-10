@@ -1,7 +1,7 @@
 import cv2
 import yaml
 import os
-import glob
+from tools.helpers import getImages
 import typer
 from loguru import logger
 from typing import List, Dict
@@ -10,23 +10,9 @@ import io
 import shutil
 from typing_extensions import Annotated
 from pathlib import Path
+from split import split
 
-def getImages(path:str) ->List[str] :
-    """get images inside directory
 
-    Args:
-        path (str): path of the directory
-
-    Returns:
-        List[str]: list of file pathes
-    """    
-    # use glob to find all files with the specified extensions
-    png_files = glob.glob(path + '/*.png')
-    jpg_files = glob.glob(path + '/*.jpg')
-    jpeg_files = glob.glob(path + '/*.jpeg')
-
-    # combine all lists into one
-    return png_files + jpg_files + jpeg_files
 
 def loadConfig():
     try:
@@ -48,6 +34,7 @@ def cmdGen(key: int, ann: io.TextIOWrapper, filename:str, cls2idx: Dict[str, int
     return False
 
 def main(in_path: str = typer.Option(..., "--in_path", "-i", help="Path to input images"), 
+         begin_index: Annotated[int, typer.Option(..., "--begin", "-b", help="Begin with specific index (ignore files before index)")] = 0,
          save: Annotated[bool, typer.Option(..., "--save", "-s", help="Path to save successfully classified images")] = False):
 
     directory = Path("result")
@@ -55,10 +42,11 @@ def main(in_path: str = typer.Option(..., "--in_path", "-i", help="Path to input
         logger.info(f"{directory} doesn't exist, so create new one.")
         os.makedirs(directory, exist_ok = True)
     
-    if save:
-        os.makedirs(Path(directory)/"success", exist_ok = True)
-
     unixTime = int(time.time())
+
+    if save:
+        os.makedirs(Path(directory)/"success"/ str(unixTime), exist_ok = True)
+
     logger.add(os.path.join(directory, f"log_{unixTime}.txt"), rotation="100 MB")
     ann = open(os.path.join(directory, f'ann_{unixTime}.txt'), 'a')
     
@@ -71,8 +59,11 @@ def main(in_path: str = typer.Option(..., "--in_path", "-i", help="Path to input
     image_files = getImages(in_path) 
     logger.info(f"Total {len(image_files)} images are loaded.")
 
+    if begin_index != 0:
+        logger.info(f"Begin annotation from index: {begin_index}")
+
     # Loop through images
-    for filename in image_files:
+    for idx, filename in enumerate(image_files[begin_index:]):
         # Read image
         img = cv2.imread(filename)
 
@@ -84,11 +75,15 @@ def main(in_path: str = typer.Option(..., "--in_path", "-i", help="Path to input
 
         # Check if user pressed 'q' key to quit
         if key == ord('q'):
-            logger.info(f"Leave annotation process at {filename}")
+            logger.info(f"Leave annotation process at {filename}. (idx: {idx}")
             ann.close() 
             break
         if key == ord("x"):
             logger.info(f"Made mistake at {prev_filename} [Right before image]")
+            # Don't save the previous things
+            continue
+        if key == ord("s"):
+            logger.info(f"Skip {filename}, this image is not relevant.")
             # Don't save the previous things
             continue
 
