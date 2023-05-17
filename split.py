@@ -31,6 +31,7 @@ def check_mismatching(imgs, anns):
         logger.info(f"the number of annotation and file are different. # images: {len(imgs)}, # anns: {len(anns)}")
 
     img_only_names = [Path(img).name for img in imgs]
+    flag = False
 
     checkedAnns = []
 
@@ -38,17 +39,19 @@ def check_mismatching(imgs, anns):
     for ann in anns:
         file_name = ann.split()[0]
         if file_name not in img_only_names:
-            logger.info(f"Anns > Images, {ann} is not in training set.")
-            raise ValueError("Remove the irrelvant ann.")
+            logger.warning(f"Anns > Images, {ann} is not in training set.")
+            flag = True
         else:
             checkedAnns.append(file_name)
 
     # check: imgs -> anns
     for file_name in img_only_names:
         if file_name not in checkedAnns:
-            logger.info(f"Images > Anns, {file_name} is not in training set.")
-            raise ValueError("Remove the irrelvant ann.")
+            logger.warning(f"Images > Anns, {file_name} is not in training set.")
+            flag = True
 
+    if flag:
+        raise ValueError("Not proceeding further. Check between ann and images.")
 
 def split(img_path: str, ann: str, ratio: float):
 
@@ -60,6 +63,7 @@ def split(img_path: str, ann: str, ratio: float):
     train_path = Path(img_path) / "train"
     val_path = Path(img_path) / "val"
 
+    # Create directories
     if not os.path.exists(train_path):
         logger.info(f"{train_path} doesn't exist, so create new one.")
         os.makedirs(train_path, exist_ok = True)
@@ -67,6 +71,7 @@ def split(img_path: str, ann: str, ratio: float):
         logger.info(f"{val_path} doesn't exist, so create new one.")
         os.makedirs(val_path, exist_ok = True)
 
+    # Move files
     for train_obj in train:
         filename = train_obj.split()[0] 
         dst = train_path / filename
@@ -76,6 +81,15 @@ def split(img_path: str, ann: str, ratio: float):
         filename = val_obj.split()[0] 
         dst = val_path / filename
         shutil.move(Path(img_path) / filename, dst)
+
+    # Write annotation text files
+    with open (Path(img_path) / 'train.txt', 'w') as file:
+        for t_line in train:
+            file.write(t_line + '\n')
+
+    with open (Path(img_path) / 'val.txt', 'w') as file:
+        for v_line in val:
+            file.write(v_line + '\n')
 
 
 def main(img_path:str = typer.Option(..., "--img_path", "-i", help="Path to images"),

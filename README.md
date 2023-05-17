@@ -30,6 +30,10 @@ if you want to copy images
 
 `python createClsAnns.py -s -i {image directory}`
 
+if you want to copy images and save them based on the class name
+
+`python createClsAnns.py -s -f -i {image directory}`
+
 if you want to start from specific index, (it is useful if you begin with the previous work.)
 
 `python createClsAnns.py -s -b {index to begin with} -i {image directory}`
