@@ -52,4 +52,8 @@ if you want to start from specific index, (it is useful if you begin with the pr
 
 ## Wanna split train and validation set?
 
+### w/o spliting folder
 `python split.py -i {image directory} -a {annotation text file} -r 0.8`
+
+### w/ spliting folder
+`python split_folder.py -i {image directory} -r 0.8`

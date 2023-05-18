@@ -61,20 +61,27 @@ def main(
         logger.info(f"{directory} doesn't exist, so create new one.")
         os.makedirs(directory, exist_ok=True)
 
-    unixTime = int(time.time())
-
-    if save:
-        save_path = Path(directory) / "success" / str(unixTime)
-        os.makedirs(save_path, exist_ok=True)
-
-    logger.add(os.path.join(directory, f"log_{unixTime}.txt"), rotation="100 MB")
-    ann = open(os.path.join(directory, f"ann_{unixTime}.txt"), "a")
-
     # Configure logger to save logs to a file
 
     cls2idx = loadConfig()
     logger.info("Config file below.")
     logger.opt(raw=True).info(yaml.dump(cls2idx))
+
+    unixTime = int(time.time())
+
+    if save:
+        save_path = Path(directory) / "success" / str(unixTime)
+        os.makedirs(save_path, exist_ok=True)
+    
+        if folder:
+            for obj in cls2idx.keys():
+                save_path_obj = Path(directory) / "success" / str(unixTime) / obj
+                os.makedirs(save_path_obj, exist_ok=True)
+
+
+    logger.add(os.path.join(directory, f"log_{unixTime}.txt"), rotation="100 MB")
+    ann = open(os.path.join(directory, f"ann_{unixTime}.txt"), "a")
+
 
     image_files = getImages(in_path)
     logger.info(f"Total {len(image_files)} images are loaded.")

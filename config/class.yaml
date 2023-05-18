@@ -1,3 +1,4 @@
-noplants: 0
+noplant: 0
 healthy: 1
-unhealthy: 2
+driedplants: 2
+leggy: 3
