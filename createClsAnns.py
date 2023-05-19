@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict, List
 
 import cv2
+import re
 import typer
 import yaml
 from loguru import logger
@@ -23,10 +24,10 @@ def loadConfig():
     return class2idx
 
 
-def cmdGen(key: int, ann: io.TextIOWrapper, filename: str, cls2idx: Dict[str, int]):
+def cmdGen(ithImg: int, key: int, ann: io.TextIOWrapper, filename: str, cls2idx: Dict[str, int]):
     for cls, idx in cls2idx.items():
         if key == ord(str(idx)):
-            logger.info(f"{filename} has class: {cls}, index: {idx}")
+            logger.info(f"[{ithImg}th image] {filename} has class: {cls}, index: {idx}")
             ann.write(f"{filename} {idx}\n")
             cv2.destroyAllWindows()
 
@@ -82,6 +83,8 @@ def main(
     ann = open(os.path.join(directory, f"ann_{unixTime}.txt"), "a")
 
     image_files = getImages(in_path)
+    # sort based on time. 
+    image_files = sorted(image_files, key=lambda x: int(re.findall(r'\d{7}', x)[0]))
     logger.info(f"Total {len(image_files)} images are loaded.")
 
     if begin_index != 0:
@@ -89,6 +92,7 @@ def main(
 
     # Loop through images
     for idx, filename in enumerate(image_files[begin_index:]):
+        
         # Read image
         img = cv2.imread(filename)
 
@@ -115,7 +119,7 @@ def main(
             # Don't save the previous things
             continue
 
-        success = cmdGen(key, ann, os.path.basename(filename), cls2idx)
+        success = cmdGen(idx, key, ann, os.path.basename(filename), cls2idx)
 
         if success and save and not folder:
             dst = save_path / Path(filename).name
