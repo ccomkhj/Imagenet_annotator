@@ -72,16 +72,14 @@ def main(
     if save:
         save_path = Path(directory) / "success" / str(unixTime)
         os.makedirs(save_path, exist_ok=True)
-    
+
         if folder:
             for obj in cls2idx.keys():
                 save_path_obj = Path(directory) / "success" / str(unixTime) / obj
                 os.makedirs(save_path_obj, exist_ok=True)
 
-
     logger.add(os.path.join(directory, f"log_{unixTime}.txt"), rotation="100 MB")
     ann = open(os.path.join(directory, f"ann_{unixTime}.txt"), "a")
-
 
     image_files = getImages(in_path)
     logger.info(f"Total {len(image_files)} images are loaded.")
@@ -106,9 +104,12 @@ def main(
             ann.close()
             break
         if key == ord("x"):
-            logger.info(f"Made mistake at {prev_filename} [Right before image]")
+            logger.info(
+                f"Made mistake at {prev_filename} [Right before image]. It is deleted."
+            )
+            os.remove(prev_dst)
             # Don't save the previous things
-            continue
+            pass
         if key == ord("s"):
             logger.info(f"Skip {filename}, this image is not relevant.")
             # Don't save the previous things
@@ -126,6 +127,7 @@ def main(
             shutil.copy(filename, dst)
 
         prev_filename = filename
+        prev_dst = dst
 
     # Close all windows
     ann.close()

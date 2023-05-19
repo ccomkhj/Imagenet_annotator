@@ -29,14 +29,6 @@ def split(img_path: str, ratio: float):
     train_path = Path(img_path) / "train"
     val_path = Path(img_path) / "val"
 
-    # Create directories
-    if not os.path.exists(train_path):
-        logger.info(f"{train_path} doesn't exist, so create new one.")
-        os.makedirs(train_path, exist_ok=True)
-    if not os.path.exists(val_path):
-        logger.info(f"{val_path} doesn't exist, so create new one.")
-        os.makedirs(val_path, exist_ok=True)
-
     # get obj class from folder names
     folders = [
         os.path.join(img_path, f)
@@ -44,15 +36,27 @@ def split(img_path: str, ratio: float):
         if f not in ["train", "val"]
     ]
 
+
+
     for folder in folders:
+
         objType = Path(folder).parts[-1]
+
+        # Create directories
+        if not os.path.exists(train_path / objType):
+            logger.info(f"{train_path / objType} doesn't exist, so create new one.")
+            os.makedirs(train_path / objType, exist_ok=True)
+            
+        if not os.path.exists(val_path / objType):
+            logger.info(f"{val_path / objType} doesn't exist, so create new one.")
+            os.makedirs(val_path / objType, exist_ok=True)
+
         train, val = split_train_val(folder, ratio)
         logger.info(f"works with {objType} with train: {len(train)}, val: {len(val)}")
 
         # Move files
         for train_obj in train:
             dst = train_path / objType / Path(train_obj).name
-            breakpoint()
             shutil.move(train_obj, dst)
 
         for val_obj in val:
