@@ -56,6 +56,10 @@ def main(
         bool,
         typer.Option(..., "--folder", "-f", help="Image saved into each class folder"),
     ] = False,
+    key: Annotated[
+        str,
+        typer.Option(..., "--key", "-k", help="Type of keys want to filter."),
+    ] = "",
 ):
     directory = Path("result")
     if not os.path.exists(directory):
@@ -83,9 +87,24 @@ def main(
     ann = open(os.path.join(directory, f"ann_{unixTime}.txt"), "a")
 
     image_files = getImages(in_path)
-    # sort based on time. 
-    image_files = sorted(image_files, key=lambda x: int(re.findall(r'\d{7}', x)[0]))
     logger.info(f"Total {len(image_files)} images are loaded.")
+
+    if len(key) > 1:
+        try:
+            with open("config/key.yaml", "r") as file:
+                keywords = yaml.safe_load(file)
+        except:
+            logger.warning("No key found in config/key.yaml")
+        
+        keys = keywords[key]
+        image_files = [image_file for image_file in image_files if any(code in image_file for code in keys) ]
+        logger.info(f"After filtering, {len(image_files)} images will be processed.")
+    else:
+        logger.info("No name filter applied.")
+
+    # sort based on time and camera code. i.e. oasis_G8T1-GJ01-2344-18FL-rgb-1679117327.jpg
+    # if you don't have this naming rule, just comment this line below.
+    image_files = sorted(image_files, key=lambda x: ( re.findall(r"\w{4}-\w{4}-\w{4}-\w{4}", x)[0] ,int(re.findall(r'\d{7}', x)[0])))
 
     if begin_index != 0:
         logger.info(f"Begin annotation from index: {begin_index}")

@@ -38,6 +38,21 @@ if you want to start from specific index, (it is useful if you begin with the pr
 
 `python createClsAnns.py -s -b {index to begin with} -i {image directory}`
 
+if you have a list of keywords that should be included.
+
+`python createClsAnns.py -s -k {keyword} -i {image directory}`
+
+in `config/key.yaml`
+```yaml
+abc:
+ - G8T1-K001-2173-0FPQ
+ - G8T1-K001-2173-0FUF
+def:
+ - xxx
+ - yyy
+```
+
+
 3. type relevant class number per image
 
 4. if you made mistake, type 'x'. It is logged that you made mistake in which image file.
